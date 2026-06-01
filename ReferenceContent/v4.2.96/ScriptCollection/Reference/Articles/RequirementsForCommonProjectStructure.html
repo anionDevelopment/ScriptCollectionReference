@@ -1,0 +1,194 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Required tools for CommonProjectStructure </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Required tools for CommonProjectStructure ">
+    <meta name="generator" content="docfx 2.59.4.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="">
+    <meta property="docfx:tocrel" content="">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="required-tools-for-commonprojectstructure">Required tools for CommonProjectStructure</h1>
+
+<h2 id="hints">Hints</h2>
+<p><a href="https://github.com/anionDev/ScriptCollection">ScriptCollection</a> contains scripts to implement a repository-structure defined by the <a href="https://projects.aniondev.de/PublicProjects/Common/ProjectTemplates/-/blob/main/Conventions/RepositoryStructure/CommonProjectStructure/CommonProjectStructure.md"><code>CommonProjectStructure</code></a>.
+To be able to run the scripts specified by the <code>CommonProjectStructure</code> successfully some tools may be required dependent on your project.
+For typically used tools the <a href="#tools">Tools</a>-section contains a short description how to install them.</p>
+<h3 id="requirements">Requirements</h3>
+<h3 id="configuration">Configuration</h3>
+<h4 id="localhostprivate-hosts-entry">localhost.private-hosts-entry</h4>
+<p><code>*.localtest.me</code> is a not-existing domain which can be used to host a HTTPS-server with a trusted certificate on the local development machine.
+For this reason you have to add an entry like <code>127.0.0.1 *.localtest.me</code> to the hosts-file on your local development-machine.
+After this the scripts inside of the code-unit can generate a certificate for the domain <code>codeunitname*.localtest.me</code> which can be used for local development-purposes.
+See the <a href="https://readme.localtest.me/">ReadMe</a> for more information.</p>
+<h3 id="tools">Tools</h3>
+<h4 id="ar">ar</h4>
+<p><code>ar</code> is an archive-program.
+It can be installed with <code>apt-get install binutils</code> on a Debian- or Ubuntu-system.
+It can be installed using MinGW on a Windows-system.</p>
+<h4 id="coverage">coverage</h4>
+<p><a href="https://github.com/nedbat/coveragepy">coverage</a> is required to create test-coverage-reports for <a href="https://www.python.org">python</a>-projects.
+The package can be installed using <code>pip install coverage</code>.</p>
+<h4 id="docfx">docfx</h4>
+<p><a href="https://github.com/dotnet/docfx">DocFX</a> is a tool to generate HTML-references by markdown-files.
+It is primary used for references based on <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/documentation-comments">documentation-comments</a> in the source-code of .NET-projects.
+The commandline-tool can be installed using <code>choco install docfx</code>.</p>
+<h4 id="docker">docker</h4>
+<p><a href="https://www.docker.com">docker</a> is required to create docker-images from a dockerfile.
+Install-instructions can be found <a href="https://github.com/christian-korneck/docker-pushrm#installation">here</a>.</p>
+<h4 id="docker-pushrm">docker pushrm</h4>
+<p><a href="https://github.com/christian-korneck/docker-pushrm">pushrm</a> is a commandline-tool to edit descriptions of a docker-image on <a href="https://hub.docker.com">hub.docker.com</a>.
+Install-instructions can be found <a href="https://docs.docker.com/engine/install/">here</a>.</p>
+<h4 id="dotnet">dotnet</h4>
+<p><a href="https://learn.microsoft.com/de-de/dotnet/core/tools/dotnet">dotnet</a> is the CLI-command to provide commands for working with .NET projects and run .NET applications.
+Install-instructions for the commandline-tool can be found <a href="https://dotnet.microsoft.com/en-us/download">here</a>.</p>
+<h4 id="dotnet-cyclonedx">dotnet cyclonedx</h4>
+<p><a href="https://github.com/CycloneDX/cyclonedx-dotnet">CycloneDX for .NET-projects</a> is a tool to generate <code>sbom.xml</code> in the <code>BOM</code>-artifact for .NET-projects.
+The commandline-tool can be installed using <code>dotnet tool install --global CycloneDX</code>.</p>
+<h4 id="epew">epew</h4>
+<p>TODO</p>
+<h4 id="gh">gh</h4>
+<p><a href="https://cli.github.com/">gh</a> is a GitHub's commandline-tool to interact with <a href="github.com">github.com</a> from commandline.
+The commandline-tool can be installed using <code>choco install gh</code>.
+Further installation-instructions are on the <a href="https://cli.github.com/manual/installation">official website</a>.</p>
+<h4 id="git">git</h4>
+<p><a href="https://git-scm.com/">git</a> is a common version control system.</p>
+<h4 id="gitversion">gitversion</h4>
+<p><a href="https://gitversion.net">gitversion</a> is a tool to calculate the project-version based on the git-history.
+The commandline-tool can be installed using <code>choco install gitversion.portable</code> in a shell with elevated privileges.</p>
+<h4 id="java">java</h4>
+<p><a href="https://openjdk.org/">java</a> is the commandline-tool for running <a href="https://docs.oracle.com/en/java">Java</a>-programs.</p>
+<h4 id="ng">ng</h4>
+<p><a href="https://github.com/angular/angular-cli">ng</a> is a CLI-tool to manage angular-projects.
+The commandline-tool can be installed using <code>npm i @angular/cli</code>.</p>
+<h4 id="npm">npm</h4>
+<p><a href="https://www.npmjs.com">npm</a> is the package-manager of <a href="https://nodejs.org/en">node</a>.
+The command <code>npm</code> is usually be available after you have installed node.</p>
+<h4 id="nuget">nuget</h4>
+<p><a href="https://www.nuget.org/">NuGet</a> is required to create <a href="https://www.nuget.org/packages">NuGet-packages</a>.
+The commandline-tool can be installed using <code>choco install nuget.commandline</code>.</p>
+<h4 id="python">python</h4>
+<p><a href="https://www.python.org">Python</a> is a common script-language.</p>
+<h4 id="reportgenerator">reportgenerator</h4>
+<p><a href="https://reportgenerator.io/">ReportGenerator</a> is required to generate HTML-reports from test-coverage-reports.
+The commandline-tool can be installed using <code>choco install reportgenerator.portable</code>.</p>
+<h4 id="scriptcollection">scriptcollection</h4>
+<p><a href="https://github.com/anionDev/ScriptCollection">ScriptCollection</a> is required to run the scripts (<code>Build.py</code>, etc.).
+The package can be installed using <code>pip install ScriptCollection</code>.</p>
+<h4 id="sh">sh</h4>
+<p>The shell <code>sh</code> is already pre-installed on most linux-systems.
+On Windows a windows-port called <code>sh.exe</code> is contained in <a href="https://git-scm.com/download/win">git for windows</a> and can be found usually in <code>C:\Program Files\Git\usr\bin</code>.</p>
+<h4 id="sn">sn</h4>
+<p>The <a href="https://learn.microsoft.com/en-us/dotnet/framework/tools/sn-exe-strong-name-tool">Strong Name tool</a> (Sn.exe) helps sign assemblies with strong names.
+It is contained the <a href="https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/">Windows SDK</a>.</p>
+<h4 id="swagger">swagger</h4>
+<p><a href="https://swagger.io">Swagger</a> is required to generate the <code>APISpecification</code>-artifact for .NET-WebAPI-Projects.
+The commandline-tool can be installed using <code>dotnet tool install --global swashbuckle.aspnetcore.cli</code>.</p>
+<h4 id="t4">t4</h4>
+<p><a href="https://github.com/mono/t4">t4</a> is a tool to generate C#-files from <a href="https://learn.microsoft.com/en-us/visualstudio/modeling/code-generation-and-t4-text-templates">T4</a>-templates.
+It can be installed using <code>dotnet tool install --global dotnet-t4</code>.
+It is an alternative implementation for <a href="https://learn.microsoft.com/en-us/visualstudio/modeling/generating-files-with-the-texttransform-utility">TextTransform</a>.</p>
+<h4 id="tar">tar</h4>
+<p><code>tar</code> is an archive-program.
+It can be installed with <code>apt-get install tar</code> on a Debian- or Ubuntu-system.
+It can be installed using MinGW on a Windows-system.</p>
+<h4 id="twine">twine</h4>
+<p><a href="https://twine.readthedocs.io/en/stable/">Twine</a> is a utility for publishing <a href="https://www.python.org">python</a> packages to PyPI and other repositories.
+The commandline-tool can be installed using <code>pip install twine</code>.</p>
+<h3 id="vg2svg-and-vl2svg">vg2svg and vl2svg</h3>
+<p><a href="https://vega.github.io/">Vega (vg2svg) and Vega-lite (vl2svg)</a> are tools to generate chart-diagrams.
+The commandline-tools can be installed using:</p>
+<pre><code class="lang-sh">npm i -g vega
+npm i -g vega-cli
+npm i -g vega-lite
+npm i -g vega-embed
+</code></pre>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
