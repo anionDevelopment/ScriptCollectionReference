@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Using custom image-registry </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Using custom image-registry ">
+    <meta name="generator" content="docfx 2.59.4.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="">
+    <meta property="docfx:tocrel" content="">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="using-custom-image-registry">Using custom image-registry</h1>
+
+<h2 id="usage">Usage</h2>
+<p>When you use third-party OCI-images (for example a base-image for your custom image or a database-image for integration-tests) then you need to take it from a registry.
+By default, the <a href="https://hub.docker.com/">docker-hub</a> will be used as registry if you do not specify any other registry.
+The disadvantage of the docker-hub is the low rate-limit.
+So it is recommended to host your own registry where you cache these images and then you can pull the images from your own registry without rate-limits.</p>
+<p>ScriptCollections supports this.</p>
+<p>How does it work?</p>
+<p>On your development-machine and in your build-server-environment you have to create the file <code>~/.scriptcollection/GlobalCache/ImageCache.csv</code>.
+In this file you can specify where the images should be taken from.</p>
+<p>Example:</p>
+<pre><code class="lang-csv">ImageName;Image;UpstreamImage
+debian;myownregistry1.example.com/debian;docker.io/library/debian
+nginx;myownregistry1.example.com/nginx;docker.io/library/nginx
+dotnet;myownregistry2.example.com/dotnetbase;mcr.microsoft.com/dotnet/aspnet
+</code></pre>
+<p>Translated to human language, this file means the following:</p>
+<ul>
+<li>When the image <code>debian</code> is required, then take it from <code>myownregistry1.example.com/debian</code> and use <code>docker.io/library/debian</code> as fallback.</li>
+<li>When the image <code>nginx</code> is required, then take it from <code>myownregistry1.example.com/nginx</code> and use <code>docker.io/library/nginx</code> as fallback.</li>
+<li>When the image <code>dotnetbase</code> is required, then take it from <code>myownregistry2.example.com/dotnetbase</code> and use <code>mcr.microsoft.com/dotnet/aspnet</code> as fallback.</li>
+</ul>
+<p>The purpose of the fallback is that when you just did <code>git clone &lt;myproject&gt;</code> and want to use it, then it should just work.
+ScriptCollection does not want to add mandatory requirements to the local development-environment apart from the existence of certain cli-tools.
+And usually for the first run, it works even with the docker-hub as fallback-registry.
+But since it is not recommended to use a fallback-registry, a warning will be displayed when the fallback-registry will be used.</p>
+<h2 id="setup-credentials">Setup credentials</h2>
+<p>Settings credentials for basic auth on a registry is supported and can be used optionally.
+On your development-machine and in your build-server-environment you have to create the file <code>~/.scriptcollection/GlobalCache/RegistryCredentials.csv</code>.
+In this file you can specify the credentials for each registry.</p>
+<p>Example:</p>
+<pre><code class="lang-csv">RegistryName;Username;Password
+myregistry1.example.com;user;pa$$w0rD1
+myregistry2.example.com;user1;pa$$w0rD2
+myregistry2.example.com;user2;pa$$w0rD3
+</code></pre>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
