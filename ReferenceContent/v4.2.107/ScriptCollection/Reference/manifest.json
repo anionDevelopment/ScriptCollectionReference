@@ -1,0 +1,112 @@
+{
+  "homepages": [],
+  "source_base_path": "E:/Data/Projects/ScriptCollectionBuild/Submodules/ScriptCollection/ScriptCollection/Other/Reference",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Conceptual",
+      "source_relative_path": "ReferenceContent/Articles/ConfigurationFolder.md",
+      "output": {
+        ".html": {
+          "relative_path": "Articles/ConfigurationFolder.html",
+          "hash": "PfsD5yLb3y2EyEPn8DA1SwLv3TDLkSn5HL3tj4xoDzA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidFileLink"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "ReferenceContent/Articles/DownloadableTools.md",
+      "output": {
+        ".html": {
+          "relative_path": "Articles/DownloadableTools.html",
+          "hash": "ZO8vcORy0gRF2IcoE9PLVv4hLlhpKBnEj3WTxgFACZM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidFileLink"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "ReferenceContent/Articles/RequirementsForCommonProjectStructure.md",
+      "output": {
+        ".html": {
+          "relative_path": "Articles/RequirementsForCommonProjectStructure.html",
+          "hash": "uY8TGXVsXzgbK/KQvc/+nUKbDNoH8DWPUWWS6JRK2bU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "ReferenceContent/Hints.md",
+      "output": {
+        ".html": {
+          "relative_path": "Hints.html",
+          "hash": "Yaolin4jAZV1Pf+37z8fRjP0Vu2oUw5XmCcwMZ+p2N4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidFileLink"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "ReferenceContent/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "R8CLJa2Mm4UlnmNE+n6deQU8R55LqZQVNAty+DDh7Rk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot build incrementally because last build info is missing.",
+        "incrementalPhase": "build",
+        "total_file_count": 0,
+        "skipped_file_count": 0,
+        "full_build_reason_code": "NoAvailableBuildCache"
+      },
+      "processors": {
+        "ConceptualDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 5,
+          "skipped_file_count": 0
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot support incremental post processing, the reason is: last post processor info is null.",
+        "incrementalPhase": "postProcessing",
+        "total_file_count": 0,
+        "skipped_file_count": 0
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}
