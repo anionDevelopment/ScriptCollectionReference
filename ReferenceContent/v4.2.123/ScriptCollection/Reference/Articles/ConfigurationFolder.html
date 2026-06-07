@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Configuration-folder </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Configuration-folder ">
+    
+    
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="configuration-folder">Configuration-folder</h1>
+
+<h2 id="overview">Overview</h2>
+<p>ScriptCollection reads its machine-wide configuration from the folder <code>~/.ScriptCollection</code> (the <code>.ScriptCollection</code>-folder in the current user's home-directory).
+The folder is created automatically when needed; all configuration-files inside it are optional and only take effect when they exist.</p>
+<blockquote>
+<p>Note: <code>~/.ScriptCollection</code> is the <strong>user-/machine-wide</strong> configuration-folder. It must not be confused with the <strong>per-repository</strong> folder <code>&lt;repository&gt;/.ScriptCollection</code>, which contains repository-specific data (see <a href="#per-repository-configuration">Per-repository configuration</a> below).</p>
+</blockquote>
+<p>Structure of <code>~/.ScriptCollection</code>:</p>
+<pre><code class="lang-text">~/.ScriptCollection/
+├── PythonExecutable.txt
+├── DockerExecutable.txt
+├── OCR/
+│   └── ServiceURL.txt
+├── TFCPS/
+│   ├── CustomPreCodeUnitBuildScript.py
+│   └── CustomC#Dependencies.csv
+└── GlobalCache/
+    ├── Tools/                          # downloaded tools (see DownloadableTools.md)
+    ├── OCIImages/
+    │   └── ImageRegistries.csv
+    ├── RegistryCredentials.csv
+    ├── Pip/
+    │   ├── MainIndex.txt
+    │   └── ExtraIndexURLs/
+    └── TranslationServiceProperties.txt
+</code></pre>
+<h2 id="executables">Executables</h2>
+<h3 id="pythonexecutabletxt"><code>PythonExecutable.txt</code></h3>
+<p>Configures which Python-executable ScriptCollection uses. The file-content is the absolute path to the executable. If the file does not exist, the current <code>sys.executable</code> (or <code>python</code>) is used.</p>
+<pre><code class="lang-text">/opt/venv/bin/python
+</code></pre>
+<h3 id="dockerexecutabletxt"><code>DockerExecutable.txt</code></h3>
+<p>Configures which Docker-executable ScriptCollection uses. The file-content is the absolute path to the executable. If the file does not exist, the default (<code>docker</code>) is used.</p>
+<pre><code class="lang-text">/usr/bin/docker
+</code></pre>
+<h2 id="globalcache">GlobalCache</h2>
+<p>The folder <code>~/.ScriptCollection/GlobalCache</code> is the machine-wide cache. It can be emptied with the command <code>sccleantoolscache</code>.</p>
+<h3 id="globalcachetools"><code>GlobalCache/Tools</code></h3>
+<p>Contains the downloaded tools (CycloneDX-CLI, PlantUML, MediaMTX, ...). This folder is managed automatically and can be pre-filled with the command <code>scdownloadcachabletools</code>. See <a href="DownloadableTools.html">Downloadable tools</a> for details.</p>
+<h3 id="globalcacheociimagesimageregistriescsv"><code>GlobalCache/OCIImages/ImageRegistries.csv</code></h3>
+<p>When you use third-party OCI-images (for example a base-image for your custom image or a database-image for integration-tests) then you need to take them from a registry.
+By default the <a href="https://hub.docker.com/">docker-hub</a> is used, which has a low rate-limit. It is therefore recommended to host your own registry that caches these images, so they can be pulled without rate-limits.</p>
+<p>This file maps an image-name to the custom registry-address it should be taken from. Columns: <code>ImageName;RegistryAddress</code>.</p>
+<pre><code class="lang-csv">ImageName;RegistryAddress
+Debian;myownregistry1.example.com/debian
+Nginx;myownregistry1.example.com/nginx
+DotNet;myownregistry2.example.com/dotnetbase
+</code></pre>
+<p>When a custom registry is defined for an image here, that registry is used. Otherwise the fallback (upstream) registry from the repository's image-definition (see <a href="#per-repository-configuration">Per-repository configuration</a>) is used.
+The purpose of the fallback is that a freshly cloned project just works without further setup; a warning is shown when the fallback-registry is used.</p>
+<h3 id="globalcacheregistrycredentialscsv"><code>GlobalCache/RegistryCredentials.csv</code></h3>
+<p>Optional basic-auth-credentials for registries. Columns: <code>RegistryName;Username;Password</code>.</p>
+<pre><code class="lang-csv">RegistryName;Username;Password
+myregistry1.example.com;user;pa$$w0rD1
+myregistry2.example.com;user1;pa$$w0rD2
+myregistry2.example.com;user2;pa$$w0rD3
+</code></pre>
+<h3 id="globalcachepip"><code>GlobalCache/Pip</code></h3>
+<p>Configures custom PyPI-index-URLs which are passed to <code>pip</code> (for example to use a private package-index).</p>
+<ul>
+<li><code>GlobalCache/Pip/MainIndex.txt</code>: Contains a line starting with <code>IndexURL: </code> followed by the main index-url (passed as <code>--index-url</code>).</li>
+<li><code>GlobalCache/Pip/ExtraIndexURLs/</code>: A folder; each file inside it contains a line starting with <code>IndexURL: </code> followed by an additional index-url (each passed as <code>--extra-index-url</code>).</li>
+</ul>
+<pre><code class="lang-text">IndexURL: https://my-private-index.example.com/simple
+</code></pre>
+<h3 id="globalcachetranslationservicepropertiestxt"><code>GlobalCache/TranslationServiceProperties.txt</code></h3>
+<p>Configures the translation-service used to translate XLF-files (for the NodeJS-/web-codeunits). Without this file no automatic translation is done.</p>
+<pre><code class="lang-text">LibreTranslateAPI=https://my-libretranslate.example.com
+</code></pre>
+<h2 id="ocr">OCR</h2>
+<h3 id="ocrserviceurltxt"><code>OCR/ServiceURL.txt</code></h3>
+<p>Configures the base-address of the OCR-service used by the OCR-commands (for example <code>scocranalysisoffile</code>). The first non-empty, non-comment line (lines starting with <code>#</code> are ignored) is used as the service-address.</p>
+<pre><code class="lang-text">https://my-ocr-service.example.com
+</code></pre>
+<h2 id="tfcps">TFCPS</h2>
+<h3 id="tfcpscustomprecodeunitbuildscriptpy"><code>TFCPS/CustomPreCodeUnitBuildScript.py</code></h3>
+<p>A custom Python-script that is executed before the codeunits are built (by <code>scbuildcodeunits</code>). It is run from the <code>~/.ScriptCollection/TFCPS</code>-folder and receives the same build-arguments. Use it for environment-specific preparation that should run on this machine before every build.</p>
+<h3 id="tfcpscustomcdependenciescsv"><code>TFCPS/CustomC#Dependencies.csv</code></h3>
+<p>Adds custom NuGet-sources that are registered before C#-codeunits are built. It is a comma-separated CSV with the header <code>Name,Url,Username,Password</code> (<code>Username</code> and <code>Password</code> are optional).</p>
+<pre><code class="lang-csv">Name,Url,Username,Password
+MyPrivateFeed,https://my-nuget.example.com/v3/index.json,user,pa$$w0rD
+</code></pre>
+<blockquote>
+<p>The same NuGet-sources can alternatively be provided via environment-variables of the form <code>Dependency_CSharp_&lt;Name&gt;_Name</code>, <code>Dependency_CSharp_&lt;Name&gt;_URL</code>, <code>Dependency_CSharp_&lt;Name&gt;_Username</code> and <code>Dependency_CSharp_&lt;Name&gt;_Password</code>.</p>
+</blockquote>
+<h2 id="per-repository-configuration">Per-repository configuration</h2>
+<p>In addition to the machine-wide <code>~/.ScriptCollection</code>-folder, each repository has its own <code>&lt;repository&gt;/.ScriptCollection</code>-folder. The most relevant file there is:</p>
+<ul>
+<li><code>&lt;repository&gt;/.ScriptCollection/OCIImages/ImageDefinition.csv</code>: Defines which OCI-images the repository uses, their upstream- (fallback-) registry and the default-tag. Columns: <code>ImageName;UpstreamRegistryAddress;DefaultTag</code>.</li>
+</ul>
+<pre><code class="lang-csv">ImageName;UpstreamRegistryAddress;DefaultTag
+Debian;docker.io/library/debian;13.4-slim
+</code></pre>
+<p>This file (per repository) defines the fallback-registry and tag, while <code>~/.ScriptCollection/GlobalCache/OCIImages/ImageRegistries.csv</code> (machine-wide) defines the custom registry to prefer.</p>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      
+      <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
