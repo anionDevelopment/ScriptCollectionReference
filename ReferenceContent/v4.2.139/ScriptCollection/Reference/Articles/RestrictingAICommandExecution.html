@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Restricting AI command-execution with scruncommandinfolder </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Restricting AI command-execution with scruncommandinfolder ">
+    
+    
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="restricting-ai-command-execution-with-scruncommandinfolder">Restricting AI command-execution with <code>scruncommandinfolder</code></h1>
+
+<h2 id="the-problem">The problem</h2>
+<p>When an AI-agent is allowed to execute commands, you usually face an uncomfortable trade-off:</p>
+<ul>
+<li>Either you allow a broad command (for example <code>dotnet</code> or <code>python</code>) — but then the agent can run it
+with <em>any</em> arguments in <em>any</em> folder, which is hard to reason about and easy to abuse.</li>
+<li>Or you forbid command-execution entirely — but then the agent can no longer do useful work like
+building, testing or linting.</li>
+</ul>
+<p>What you usually <em>want</em> is the middle ground: allow a <strong>specific, predefined command</strong> (including its
+arguments) that <strong>always runs inside one known folder</strong> (e.g. a single repository), and let the agent only
+contribute <strong>a subpath of that folder as an argument</strong> — without ever changing the command, its arguments
+or the folder it runs in.</p>
+<p><code>scruncommandinfolder</code> is built exactly for this.</p>
+<h2 id="how-it-works">How it works</h2>
+<pre><code class="lang-text">scruncommandinfolder -b &lt;basefolder&gt; -c &lt;command&gt; -a &quot;&lt;arguments&gt;&quot; [-e &lt;excludedfolder&gt; ...] -f &lt;actualfolder&gt;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-b</code> / <code>--basefolder</code></td>
+<td>The repository-folder. The command is <strong>always</strong> executed with this folder as its working-directory. <code>actualfolder</code> must be this folder or a subfolder of it.</td>
+</tr>
+<tr>
+<td><code>-c</code> / <code>--command</code></td>
+<td>The program to execute (for example <code>python</code>, <code>dotnet</code>, <code>git</code>).</td>
+</tr>
+<tr>
+<td><code>-a</code> / <code>--arguments</code></td>
+<td>The arguments passed to the command. May contain the magic string <code>{actual_folder}</code>, which is replaced by the resolved <code>actualfolder</code>.</td>
+</tr>
+<tr>
+<td><code>-e</code> / <code>--excludedfolder</code></td>
+<td>A folder that is <strong>forbidden</strong> even though it lies inside <code>basefolder</code>. Must be given <strong>relative to</strong> <code>basefolder</code>. Can be repeated. If <code>actualfolder</code> is equal to or inside one of these, the command is rejected.</td>
+</tr>
+<tr>
+<td><code>-f</code> / <code>--actualfolder</code></td>
+<td>A subpath of <code>basefolder</code> that the agent may supply. It is validated and then substituted into the arguments via the placeholder — it does <strong>not</strong> change where the command runs. If it is relative it is resolved against the current working-directory.</td>
+</tr>
+</tbody>
+</table>
+<p>The command itself always runs with <code>basefolder</code> as its working-directory; the agent never gets to choose
+the folder the command runs <em>in</em>. The only thing <code>actualfolder</code> does is provide a (validated) path that can
+be inserted into the command's arguments.</p>
+<p>Before the command is executed, <code>scruncommandinfolder</code> resolves <code>actualfolder</code> to an absolute path and
+verifies that it is equal to <code>basefolder</code> or located <strong>inside</strong> it. If it is not, the command is rejected
+with an error and nothing is executed. This check cannot be circumvented through relative paths or path
+fragments, because the comparison happens on normalized, resolved absolute paths.</p>
+<h2 id="why-this-is-safe-to-put-into-an-allow-list">Why this is safe to put into an allow-list</h2>
+<p>The idea is to put a <strong>fully specified</strong> invocation into the allow-list (for example the allow-file of an
+AI-agent's command-permissions) and let the agent only append a subpath of the repository that it wants to
+pass as an argument:</p>
+<pre><code class="lang-text">scruncommandinfolder -b &lt;repo&gt; -c mycommand -a &quot;my argument {actual_folder} some more arguments&quot; *
+</code></pre>
+<ul>
+<li><code>-b &lt;repo&gt;</code>, <code>-c mycommand</code> and the whole <code>-a &quot;…&quot;</code> part are <strong>pinned</strong> by the allow-rule. The agent
+cannot change the command, cannot change its arguments, and cannot change the base-folder.</li>
+<li>The trailing <code>*</code> is the wildcard of the allow-rule. It permits the agent to append the remaining part of
+the invocation — i.e. <code>-f &lt;some-subpath&gt;</code>. So <strong>the only thing the agent gets to choose is a subpath of
+the repository that is passed into the command as an argument</strong> — not where the command runs.</li>
+<li>And even that choice is not free: <code>scruncommandinfolder</code> enforces that the supplied <code>-f</code>-path lies within
+<code>&lt;repo&gt;</code>. The agent can reference a subfolder of the repository, but nothing outside of it. The command
+still always runs with <code>&lt;repo&gt;</code> as its working-directory.</li>
+</ul>
+<h3 id="a-real-allow-file-example">A real allow-file example</h3>
+<p>The file <a href="./Examples/scruncommandinfolder.claude-settings.example.json"><code>Examples/scruncommandinfolder.claude-settings.example.json</code></a>
+shows how this looks in a Claude-Code <code>settings.local.json</code>:</p>
+<pre><code class="lang-json">{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [
+      &quot;Bash(scruncommandinfolder -b /work/myrepo -c dotnet -a \&quot;build {actual_folder} --configuration Release\&quot; *)&quot;,
+      &quot;Bash(scruncommandinfolder -b /work/myrepo -c dotnet -a \&quot;test {actual_folder}\&quot; *)&quot;
+    ]
+  }
+}
+</code></pre>
+<p>The important point: <code>-b /work/myrepo</code> is part of the <strong>literal prefix</strong> of the allow-rule. The repository
+folder is hard-coded into the permission and is <strong>not</strong> something the agent supplies. The agent only gets
+to provide the part covered by the trailing <code>*</code>, i.e. the <code>-f &lt;subpath&gt;</code>-argument. So the repository is the
+fixed working-directory of every allowed invocation, and the agent can at most reference a subfolder inside
+it as an argument — it can never move the execution out of the repository.</p>
+<blockquote>
+<p><strong>Tip: use <code>.</code> instead of an absolute path to make the rule portable and committable.</strong>
+Instead of hard-coding an absolute path like <code>/work/myrepo</code>, you can set <code>-b .</code>:</p>
+<pre><code class="lang-json">{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [
+      &quot;Bash(scruncommandinfolder -b . -c dotnet -a \&quot;build {actual_folder} --configuration Release\&quot; *)&quot;,
+      &quot;Bash(scruncommandinfolder -b . -c dotnet -a \&quot;test {actual_folder}\&quot; *)&quot;
+    ]
+  }
+}
+</code></pre>
+<p><code>.</code> is resolved against the current working-directory, which is the repository-root when the agent runs
+commands from there (the default). Because the rule no longer contains a machine-specific absolute path,
+it is <strong>identical for every developer and every checkout-location</strong>, so you can commit it and put it into
+the shared <code>settings.json</code> (instead of only the personal, git-ignored <code>settings.local.json</code>).</p>
+<p>Note that with <code>-b .</code> the working-directory is &quot;wherever the command is invoked from&quot; rather than a fixed
+absolute path. As long as the agent's working-directory is reliably the repository-root, this is equivalent
+and safe; if the working-directory could be redirected (for example by a chained <code>cd</code> in the same
+invocation), an absolute <code>-b</code> gives the stronger guarantee.</p>
+</blockquote>
+<p>The net effect is a sharp reduction of what the agent can do, while still letting it do the intended work:</p>
+<ul>
+<li><strong>defined command</strong> — only <code>mycommand</code> with exactly the pinned arguments can run, nothing else,</li>
+<li><strong>fixed location</strong> — the command <strong>always</strong> runs with <code>&lt;repo&gt;</code> as its working-directory; it never runs
+anywhere else,</li>
+<li><strong>agent-controlled detail</strong> — the agent only selects <em>which subpath of the repository</em> is passed to the
+command as an argument.</li>
+</ul>
+<p>This increases security precisely because you are allowing <em>defined</em> commands, but only <em>for certain
+folders</em> — instead of handing out a general-purpose command-execution capability.</p>
+<h2 id="the-actual_folder-placeholder">The <code>{actual_folder}</code> placeholder</h2>
+<p>Often the command needs to know the folder the agent picked — not as the working-directory, but as an
+explicit argument (for example a path to build or a directory to lint). For that, write the magic string
+<code>{actual_folder}</code> anywhere inside the <code>-a</code>-arguments. Every occurrence is replaced with the resolved
+absolute path of <code>actualfolder</code> right before execution:</p>
+<pre><code class="lang-text">scruncommandinfolder -b /work/myrepo -c dotnet -a &quot;build {actual_folder} --configuration Release&quot; -f /work/myrepo/src/MyProject
+</code></pre>
+<p>Here the allow-rule pins <code>dotnet build {actual_folder} --configuration Release</code>, and the agent only decides
+<em>which</em> subpath (<code>src/MyProject</code>) is passed as the build-target. The command still runs with <code>/work/myrepo</code>
+as its working-directory — the agent does not pick where <code>dotnet</code> runs, only the path-argument it receives.
+Because the placeholder is substituted by <code>scruncommandinfolder</code> itself (and the path is validated to be
+inside <code>/work/myrepo</code>), the agent cannot smuggle in a different path or extra arguments through it.</p>
+<h2 id="excluding-folders-inside-the-base-folder">Excluding folders inside the base-folder</h2>
+<p>Sometimes a folder lies <em>inside</em> the repository but must still be off-limits — for example <code>.git</code>, <code>.claude</code>
+or a folder holding secrets. For these cases there is the <code>-e</code> / <code>--excludedfolder</code> flag. Each excluded
+folder is given <strong>relative to the base-folder</strong> and can be repeated:</p>
+<pre><code class="lang-text">scruncommandinfolder -b /work/myrepo -c dotnet -a &quot;test {actual_folder}&quot; -e .git -e .claude -e Other/Secrets -f &lt;subpath&gt;
+</code></pre>
+<p>Now <code>actualfolder</code> is rejected not only when it lies <em>outside</em> the base-folder, but also when it is equal to
+or located <em>inside</em> any of the excluded folders. So <code>-f /work/myrepo/.git</code> or
+<code>-f /work/myrepo/Other/Secrets/keys</code> both fail, even though they are technically inside the repository.</p>
+<p>Two properties make this robust:</p>
+<ul>
+<li>The excluded folders are resolved (relative to the base-folder) and normalized, so a <code>..</code>-trick like
+<code>-f .git/../.git</code> cannot sneak back into an excluded folder.</li>
+<li>The excluded folders <strong>must be relative</strong>. Passing an absolute path as <code>-e</code> is rejected with an error.
+This keeps the meaning unambiguous (always &quot;relative to this repository&quot;) and keeps the allow-rule
+portable when <code>-b .</code> is used.</li>
+</ul>
+<p>In an allow-list, the excluded folders are part of the pinned prefix, just like the command and its
+arguments — the agent cannot remove or weaken them:</p>
+<pre><code class="lang-json">{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [
+      &quot;Bash(scruncommandinfolder -b . -c dotnet -a \&quot;test {actual_folder}\&quot; -e .git -e .claude -e Other/Secrets *)&quot;
+    ]
+  }
+}
+</code></pre>
+<h2 id="path-traversal-cannot-be-used-to-escape-the-base-folder">Path-traversal cannot be used to escape the base-folder</h2>
+<p>A natural attempt to trick the check is to pass an <code>actualfolder</code> that <em>looks</em> like it is inside the
+base-folder but uses <code>..</code>-segments to climb back out:</p>
+<pre><code class="lang-text">scruncommandinfolder -b /work/myrepo -c dotnet -a &quot;test&quot; -f &quot;/work/myrepo/../../../OtherProject&quot;
+</code></pre>
+<p>or, with a relative argument that walks up from the working-directory:</p>
+<pre><code class="lang-text">scruncommandinfolder -b /work/myrepo -c dotnet -a &quot;test&quot; -f &quot;../../../OtherProject&quot;
+</code></pre>
+<p>Both attempts are <strong>rejected</strong>. Before comparing, <code>scruncommandinfolder</code> resolves <code>actualfolder</code> to a
+normalized absolute path (relative paths are resolved against the current working-directory, and every
+<code>..</code>-segment is collapsed). The string <code>&quot;/work/myrepo/../../../OtherProject&quot;</code> therefore becomes something
+like <code>/OtherProject</code>, which is neither equal to <code>/work/myrepo</code> nor located inside it. The check fails and
+the command exits with an error <strong>without executing anything</strong>.</p>
+<p>This is why the comparison is done on resolved, normalized paths instead of on the raw strings: a naive
+<code>startswith</code>-check on the literal text would be fooled by <code>/work/myrepo/../../../OtherProject</code> (it <em>does</em>
+start with <code>/work/myrepo</code>), but after normalization the <code>..</code>-segments are gone and the real target is
+revealed. The actual enforcement happens in <code>ScriptCollectionCore.run_command_in_folder</code>, so it holds
+regardless of how the command is invoked.</p>
+<h2 id="related-allow-reading-any-file-except-in-certain-folders">Related: allow reading any file except in certain folders</h2>
+<p>The same &quot;allow broadly, but exclude some folders&quot;-idea is useful for <strong>reading</strong> files, too. <code>scprintfilecontent</code>
+(which prints the content of the file given via <code>-p</code>) supports the very same <code>--excludedfolder</code> mechanism: you
+let the agent read any file in general, but forbid a few sensitive folders. The folders are given with <code>-x</code> /
+<code>--excludedfolder</code>, relative to the base-folder <code>-b</code>. The file
+<a href="./Examples/scprintfilecontent.claude-settings.example.json"><code>Examples/scprintfilecontent.claude-settings.example.json</code></a>
+shows this:</p>
+<pre><code class="lang-json">{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [
+      &quot;Bash(scprintfilecontent -b . -x .git -x .claude -x Other/Secrets -p *)&quot;
+    ]
+  }
+}
+</code></pre>
+<p>The pinned prefix <code>scprintfilecontent -b . -x .git -x .claude -x Other/Secrets</code> fixes the excluded folders,
+and the trailing <code>*</code> lets the agent only supply the <code>-p &lt;file&gt;</code>-argument. The agent may then read any file —
+except files located in <code>.git</code>, <code>.claude</code> or <code>Other/Secrets</code>, which <code>scprintfilecontent</code> rejects with an
+error.</p>
+<p>Note that this is <strong>not</strong> done with fragile <code>deny</code>-string-patterns. The exclusion is enforced inside the
+command by the same resolved, normalized-path containment-check that <code>scruncommandinfolder</code> uses (both share
+<code>ScriptCollectionCore.path_is_inside_one_of_the_folders</code>). So a <code>..</code>-trick or a different path-spelling cannot
+be used to read an excluded file — the check operates on the real, resolved target-path, not on the literal
+command-string.</p>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      
+      <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
