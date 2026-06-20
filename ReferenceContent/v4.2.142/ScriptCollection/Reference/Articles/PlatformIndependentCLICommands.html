@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Platform-independent CLI commands </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Platform-independent CLI commands ">
+    
+    
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="platform-independent-cli-commands">Platform-independent CLI commands</h1>
+
+<h2 id="overview">Overview</h2>
+<p>ScriptCollection ships with a set of small command-line tools that wrap common filesystem and string operations.
+The reason they exist as standalone CLI-commands (and not &quot;just&quot; as Python-functions on <code>ScriptCollectionCore</code>) is that they make the same operation usable from:</p>
+<ul>
+<li>any shell on <strong>any operating system</strong> (Windows <code>cmd</code>/PowerShell, Linux/macOS <code>bash</code>/<code>zsh</code>, etc.) with <strong>identical syntax</strong>,</li>
+<li>inside Python-code via <code>ScriptCollectionCore</code>, which transparently delegates to these commands when the actual execution happens on a <strong>remote/different platform</strong> through the configured <code>ProgramRunner</code>.</li>
+</ul>
+<p>If you write a build- or maintenance-script with these commands, the same script will run unchanged on Windows, Linux and macOS — and the matching <code>ScriptCollectionCore</code>-method will work the same way locally and remotely.</p>
+<h2 id="commands">Commands</h2>
+<h3 id="filesystem-queries">Filesystem queries</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+<th>Exit-codes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scfileexists -p &lt;path&gt;</code></td>
+<td>Tests whether <code>&lt;path&gt;</code> is an existing file.</td>
+<td><code>0</code> = exists, <code>2</code> = does not exist, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>scfolderexists -p &lt;path&gt;</code></td>
+<td>Tests whether <code>&lt;path&gt;</code> is an existing folder.</td>
+<td><code>0</code> = exists, <code>2</code> = does not exist, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>scgetsize -p &lt;path&gt;</code></td>
+<td>Prints the size of a file or folder (bytes) to stdout.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>scprintfilesize -p &lt;path&gt;</code></td>
+<td>Prints the size of a file (bytes) to stdout.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>sclistfoldercontent -p &lt;path&gt; [-f] [-d] [-n]</code></td>
+<td>Lists the immediate entries of a folder. <code>-f</code> includes files, <code>-d</code> includes folders, <code>-n</code> prints only names without paths.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+</tbody>
+</table>
+<h3 id="file-reading-and-writing">File reading and writing</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+<th>Exit-codes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scprintfilecontent -p &lt;path&gt;</code></td>
+<td>Prints the textual content of a file to stdout.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>scsetcontentoffile -p &lt;path&gt; -c &lt;content&gt; [--argumentisinbase64]</code></td>
+<td>Overwrites a file's content. With <code>--argumentisinbase64</code> the content is interpreted as base64-encoded UTF-8, which lets you transport arbitrary bytes (including binary data and newlines) safely on any shell.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>scfilecontainscontent -p &lt;path&gt; -c &lt;pattern&gt; [-r] [-i] [-e &lt;encoding&gt;]</code></td>
+<td>Tests whether <code>&lt;pattern&gt;</code> occurs in the file. <code>-r</code> treats the pattern as regex, <code>-i</code> makes the match case-insensitive.</td>
+<td><code>0</code> = contains, <code>2</code> = does not contain, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>scappendlinetofile -p &lt;path&gt; -l &lt;line&gt; [--skip-leading-newline-if-file-already-ends-with-newline] [--no-trailing-newline]</code></td>
+<td>Appends a single line to a file. By default a leading and a trailing newline are added so the line is on its own line and the file remains POSIX-line-ended.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>scregexreplaceinfile -p &lt;path&gt; -r &lt;pattern&gt; -w &lt;replacement&gt; [-i] [-m] [-d] [-e &lt;encoding&gt;]</code></td>
+<td>In-place regex replacement on a file. Backreferences (<code>\1</code>, <code>\2</code>, …) are supported. Flags: <code>-i</code> case-insensitive, <code>-m</code> multiline, <code>-d</code> dotall.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+</tbody>
+</table>
+<h3 id="file-and-folder-manipulation">File and folder manipulation</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+<th>Exit-codes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sccreatefile -p &lt;path&gt; [--errorwhenexists] [--createnecessaryfolder]</code></td>
+<td>Creates an empty file.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>sccreatefolder -p &lt;path&gt; [--errorwhenexists] [--createnecessaryfolder]</code></td>
+<td>Creates an empty folder.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>scremovefile -p &lt;path&gt;</code></td>
+<td>Removes a file.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>scremovefolder -p &lt;path&gt;</code></td>
+<td>Removes a folder (recursively).</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>screname -s &lt;source&gt; -t &lt;target&gt;</code></td>
+<td>Renames/moves a file or folder.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>sccopy -s &lt;source&gt; -t &lt;target&gt;</code></td>
+<td>Copies a file or folder.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+</tbody>
+</table>
+<h3 id="iteration-and-orchestration">Iteration and orchestration</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+<th>Exit-codes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scforeach -f &lt;folder&gt; -c &quot;&lt;command&gt;&quot; [-t] [--include-folders] [--skip-files] [--continue-on-error]</code></td>
+<td>Runs a command for each entry of a folder. The placeholder <code>{path}</code> in the command template is substituted with the entry's absolute path. <code>-t</code> walks the folder transitively. By default only file-entries are processed; <code>--include-folders</code> adds folders, <code>--skip-files</code> excludes files. With <code>--continue-on-error</code> the iteration continues even if a single command fails.</td>
+<td><code>0</code> = all succeeded, otherwise the exit-code of the last failure</td>
+</tr>
+</tbody>
+</table>
+<h3 id="environment">Environment</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+<th>Exit-codes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scprintosname</code></td>
+<td>Prints <code>Windows</code> / <code>Linux</code> / <code>Other</code> (mapped from the running OS). Useful for <code>if</code>-branches in cross-platform scripts.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+<tr>
+<td><code>scprintcurrentworkingdirectory</code></td>
+<td>Prints the current working directory to stdout.</td>
+<td><code>0</code> = success, <code>1</code> = error</td>
+</tr>
+</tbody>
+</table>
+<h2 id="why-platform-independent">Why platform-independent?</h2>
+<p>Every one of these commands does something that <strong>already exists</strong> as a shell-built-in or Unix-utility:
+copy = <code>cp</code>/<code>copy</code>, remove = <code>rm</code>/<code>del</code>, regex-replace = <code>sed</code>/<code>Replace-Inline</code>, iterate = <code>find -exec</code> / <code>ForEach-Object</code>, etc.</p>
+<p>The problem is that the <strong>syntax and behaviour differ</strong> between Windows <code>cmd</code>, PowerShell, <code>bash</code> and <code>zsh</code>.
+The <code>sc*</code>-commands provide one syntax that works <strong>everywhere identically</strong>:</p>
+<pre><code class="lang-bash"># Same syntax on cmd, PowerShell, bash, zsh, ...
+scappendlinetofile -p ./CHANGELOG.md -l &quot;## v1.2.0&quot;
+scfilecontainscontent -p ./README.md -c &quot;## Installation&quot; || echo &quot;no install-section&quot;
+scregexreplaceinfile -p ./pyproject.toml -r 'version = &quot;.*&quot;' -w 'version = &quot;1.2.0&quot;'
+scforeach -f ./projects -t -c &quot;git -C \&quot;{path}\&quot; status -s&quot; --include-folders --skip-files
+</code></pre>
+<p>This is especially useful in cases where:</p>
+<ul>
+<li>the same maintenance-script has to run on developer-laptops (mixed OSes) and the CI-runner (Linux container),</li>
+<li>a Taskfile / Makefile needs to call file-operations and stay cross-platform without <code>if</code>-branches per OS,</li>
+<li>a Python-program uses <code>ScriptCollectionCore</code> to drive operations on a <strong>remote</strong> machine via SSH (or any other <code>ProgramRunner</code>); the corresponding <code>ScriptCollectionCore</code>-method then runs the matching <code>sc*</code>-command over the remote channel transparently.</li>
+</ul>
+<h2 id="counterpart-in-scriptcollectioncore">Counterpart in <code>ScriptCollectionCore</code></h2>
+<p>For every command above there is a matching <code>ScriptCollectionCore</code>-method (<code>is_file</code>, <code>is_folder</code>, <code>get_size</code>, <code>get_file_content</code>, <code>set_file_content</code>, <code>file_contains_content</code>, <code>remove</code>, <code>rename</code>, <code>copy</code>, <code>create_file</code>, <code>create_folder</code>, <code>list_content</code>, …).
+These methods do the operation <strong>locally</strong> when the <code>ProgramRunner</code> is configured for local execution (much faster than spawning the CLI),
+and call out to the corresponding <code>sc*</code>-command when the configured runner targets a remote/different system.</p>
+<pre><code class="lang-python">sc = ScriptCollectionCore()
+# Local: direct file IO. Remote (e.g. via SSH-runner): runs `scfilecontainscontent` over the channel.
+if sc.file_contains_content(&quot;/etc/hosts&quot;, &quot;127.0.0.1&quot;):
+    sc.set_file_content(&quot;/etc/hosts&quot;, new_hosts_content)
+</code></pre>
+<h2 id="combined-example">Combined example</h2>
+<p>A small &quot;release-prep&quot; workflow that works on any OS, from any shell:</p>
+<pre><code class="lang-bash"># Bump version in two files
+scregexreplaceinfile -p pyproject.toml -r 'version = &quot;.*&quot;' -w 'version = &quot;1.4.0&quot;'
+scregexreplaceinfile -p src/Version.txt -r '.+' -w '1.4.0'
+
+# Append changelog entry
+scappendlinetofile -p CHANGELOG.md -l &quot;## v1.4.0 - Build performance improvements&quot; --skip-leading-newline-if-file-already-ends-with-newline
+
+# Verify
+scfilecontainscontent -p CHANGELOG.md -c &quot;v1.4.0&quot; &amp;&amp; echo &quot;changelog updated&quot;
+</code></pre>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      
+      <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
