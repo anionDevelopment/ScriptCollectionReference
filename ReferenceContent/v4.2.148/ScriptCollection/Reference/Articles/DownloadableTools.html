@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Downloadable tools </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Downloadable tools ">
+    
+    
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="downloadable-tools">Downloadable tools</h1>
+
+<h2 id="overview">Overview</h2>
+<p>ScriptCollection uses several external tools (for example for SBOM-generation or diagram-rendering).
+Instead of requiring them to be installed system-wide, ScriptCollection downloads them on demand and stores them in the global cache-folder <code>~/.scriptcollection/GlobalCache/Tools</code>.</p>
+<p>For each of these tools there are two kinds of functions on <code>TFCPS_Tools_General</code>:</p>
+<ul>
+<li>An <code>ensure_&lt;tool&gt;_is_available(...)</code>-function that makes sure the tool is present (downloading it if necessary) and returns the path to the tool so it can be <strong>used</strong>.</li>
+<li>A <code>download_&lt;tool&gt;(enforce_update=False)</code>-function that only <strong>downloads</strong> the tool into the global cache (all platforms), without using it.</li>
+</ul>
+<p>The <code>ensure_*</code>-functions are called automatically during a build when the respective tool is needed, so usually you do not have to call anything manually.</p>
+<h2 id="available-tools">Available tools</h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Download-function</th>
+<th>Use-function</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CycloneDX-CLI</td>
+<td><code>download_cyclonedx</code></td>
+<td><code>ensure_cyclonedxcli_is_available</code></td>
+<td>GitHub <code>CycloneDX/cyclonedx-cli</code></td>
+</tr>
+<tr>
+<td>PlantUML</td>
+<td><code>download_plantuml</code></td>
+<td><code>ensure_plantuml_is_available</code></td>
+<td>GitHub <code>plantuml/plantuml</code></td>
+</tr>
+<tr>
+<td>JRE (Eclipse-Temurin)</td>
+<td><code>download_jre</code></td>
+<td><code>ensure_jre_is_available</code></td>
+<td>GitHub <code>adoptium/temurin21-binaries</code></td>
+</tr>
+<tr>
+<td>MediaMTX</td>
+<td><code>download_mediamtx</code></td>
+<td><code>ensure_mediamtx_is_available</code></td>
+<td>GitHub <code>bluenviron/mediamtx</code></td>
+</tr>
+<tr>
+<td>TruffleHog</td>
+<td><code>download_trufflehog</code></td>
+<td><code>ensure_trufflehog_is_available</code></td>
+<td>GitHub <code>trufflesecurity/trufflehog</code></td>
+</tr>
+<tr>
+<td>OpenAPIGenerator</td>
+<td><code>download_openapigenerator</code></td>
+<td><code>ensure_openapigenerator_is_available</code></td>
+<td>Maven-Central (<code>org.openapitools</code>)</td>
+</tr>
+<tr>
+<td>AndroidAppBundleTool</td>
+<td><code>download_androidappbundletool</code></td>
+<td><code>ensure_androidappbundletool_is_available</code></td>
+<td>GitHub <code>google/bundletool</code></td>
+</tr>
+</tbody>
+</table>
+<p>All of these tools are stored in the global cache (<code>~/.scriptcollection/GlobalCache/Tools</code>).
+The CycloneDX-CLI and MediaMTX are downloaded for all supported platforms (linux/windows/macOS, x64/arm64 where available) so the warmed cache can be reused independent of the executing platform.
+The JRE is the exception here: only the executing platform is warmed, because a JDK-archive is large (~200 MB) and the build-image is built per-platform. A specific Temurin-build is pinned (not just the major-version) and used to render all PlantUML-diagrams instead of the host's <code>java</code> on the <code>PATH</code>. Together with the bundled DejaVu-font this makes the rendered diagram-SVGs byte-identical across machines (e.g. a Windows-client and the Debian-build-container), because PlantUML computes the SVG-geometry purely from the JDK's font-metrics, which differ slightly between JDK-builds. When the pinned build is bumped, the committed diagram-SVGs must be regenerated and re-committed once.</p>
+<h2 id="pre-downloading-all-tools-scdownloadcachabletools">Pre-downloading all tools (<code>scdownloadcachabletools</code>)</h2>
+<p>There is one CLI-command that downloads all cachable tools at once:</p>
+<pre><code class="lang-bash">scdownloadcachabletools
+</code></pre>
+<p>It calls <code>TFCPS_Tools_General.download_all_cachable_tools</code>, which in turn calls every <code>download_&lt;tool&gt;</code>-function.</p>
+<p>Options:</p>
+<ul>
+<li><code>-v</code> / <code>--verbose</code>: Enables verbose (debug) output (logs each tool that is being downloaded).</li>
+<li><code>-e</code> / <code>--enforceupdate</code>: Re-downloads the tools even if they are already present in the cache.</li>
+</ul>
+<h3 id="why-this-is-useful">Why this is useful</h3>
+<p>The main use-case is to call <code>scdownloadcachabletools</code> inside a build-image (for example in the <code>Dockerfile</code> of the CI build-environment).
+Because the tools are then already present in the image:</p>
+<ul>
+<li>repeated pipeline-runs do not hit the rate-limits of the download-sources (for example the GitHub-API), and</li>
+<li>the pipeline runs faster, because nothing has to be downloaded at build-time.</li>
+</ul>
+<p>Example (in a <code>Dockerfile</code> of the build-image, after ScriptCollection has been installed):</p>
+<pre><code class="lang-dockerfile">RUN scdownloadcachabletools
+</code></pre>
+<h2 id="tools-that-are-not-part-of-this-command">Tools that are not part of this command</h2>
+<p>Some tools are handled differently and are therefore not downloaded by <code>scdownloadcachabletools</code>:</p>
+<ul>
+<li><strong>FFMPEG</strong> (<code>ensure_ffmpeg_is_available</code>): This is not stored in the global cache but downloaded directly into a specific codeunit's <code>Other/Resources/FFMPEG</code>-folder. It is therefore codeunit-specific and cannot be pre-warmed independent of a codeunit. (In a build-image, ffmpeg is usually installed as a system-package instead.)</li>
+<li><strong>Syft</strong>: This is used as an OCI-image (pulled via the image-manager / custom registry, see <a href="./UsingCustomImageRegistry.md">UsingCustomImageRegistry.md</a>), not as a cached binary in the tools-cache.</li>
+</ul>
+<h2 id="cleaning-the-cache">Cleaning the cache</h2>
+<p>The counterpart to pre-downloading is <code>sccleantoolscache</code>, which empties the global cache-folder.</p>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      
+      <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
