@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Remote-build (operating-system-bound build-steps) </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Remote-build (operating-system-bound build-steps) ">
+    
+    
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="remote-build-operating-system-bound-build-steps">Remote-build (operating-system-bound build-steps)</h1>
+
+<h2 id="overview">Overview</h2>
+<p>Some build-steps can only be produced on a specific operating-system:</p>
+<ul>
+<li>Flutter <code>windows</code>-builds must be built on Windows.</li>
+<li>Flutter <code>ios</code>-builds must be built on macOS.</li>
+</ul>
+<p>Neither the (Linux) Debian-build-pipeline nor (for iOS) a Windows-developer-client can produce these. ScriptCollection
+therefore delegates such operating-system-bound steps to a <strong>remote task-runner</strong> that runs on the correct operating-system.</p>
+<p>The mechanism is generic and available to every codeunit-type (it lives in <code>TFCPS_CodeUnitSpecific_Base</code>, not only in the
+flutter-codeunit): <code>self.run_program_on_remote_runner(required_os, program, arguments, working_directory)</code>. The actual
+transport/synchronization is implemented in <code>TFCPS_RemoteBuild</code>; the runners are the codeunits <code>SCTaskRunnerWindows</code> and
+<code>SCTaskRunnerMacOS</code> (in the SCBuilder-repository), which each expose an HTTP-server.</p>
+<h2 id="flow">Flow</h2>
+<ol>
+<li>The client packs the <strong>whole repository</strong> (including the <code>.git</code>-folder, uncommitted changes and git-ignored files) into
+a tar-archive and sends it over HTTPS to the runner that provides the required operating-system.
+<ul>
+<li>git-ignored files and uncommitted changes are included on purpose: they are sometimes required for the build (for
+example signing-certificates for windows-builds). The runner is part of the build-infrastructure and is trusted exactly
+like the machine/container on which <code>scbuildcodeunits</code> runs and from which such secrets originate; therefore there is
+<strong>no</strong> secret-exclude-filter.</li>
+</ul>
+</li>
+<li>The runner extracts the archive into a <strong>fresh, empty workspace</strong> (isolation), runs the requested program on its
+operating-system, and returns <strong>only the codeunit-folder</strong>.</li>
+<li>The client <strong>mirrors the returned codeunit-folder</strong> back into the local repository (a full replacement, so additions,
+modifications and deletions of the runner are reflected - regardless of whether files are git-ignored). Afterwards it
+looks exactly as if the runner had built locally.</li>
+<li>The client deletes the job on the runner, which <strong>deletes the runner-workspace immediately</strong>, so no repository-content
+remains on the runner.</li>
+</ol>
+<h2 id="why-only-the-codeunit-folder-is-mirrored-back">Why only the codeunit-folder is mirrored back</h2>
+<p>A build-script must, by definition, never change anything outside of its own codeunit-folder. Therefore mirroring back just
+the codeunit-folder is sufficient to reproduce the complete result of the remote build, and it keeps the round-trip small.</p>
+<h2 id="why-windows--and-ios-builds-always-use-a-runner">Why windows- and ios-builds always use a runner</h2>
+<p>The flutter-codeunit delegates <code>windows</code>- and <code>ios</code>-builds to a runner <strong>unconditionally</strong> - even a windows-build started on
+a Windows-developer-client is delegated to the Windows-runner. The reason is <strong>uniform builds</strong>: every build of a given
+target is produced in the same, defined environment, independent of which developer-machine or pipeline triggered it. This
+avoids subtle differences between locally-built and pipeline-built artifacts.</p>
+<h2 id="runner-configuration-client-side">Runner-configuration (client-side)</h2>
+<p>The client needs the URL and basic-auth-credentials of the runners. Two sources are supported (analogous to how custom
+NuGet-sources for C#-dependencies are configured):</p>
+<ol>
+<li><strong><code>~/.ScriptCollection/TFCPS/Runner.csv</code></strong> (primarily for developer-clients): one line per runner in the format
+<code>url;user;password</code>.</li>
+<li><strong>Environment-variables</strong> (primarily for the build-pipeline): <code>Runner_&lt;name&gt;_URL</code>, <code>Runner_&lt;name&gt;_Username</code> and
+<code>Runner_&lt;name&gt;_Password</code>.</li>
+</ol>
+<p>If neither source defines a runner, the remote-build fails with an error. The configuration does not state which runner
+provides which operating-system; instead each configured runner is queried (via its <code>GET /os</code>-endpoint) and the one matching
+the required operating-system is used.</p>
+<h2 id="runners">Runners</h2>
+<p>The runners are the codeunits <code>SCTaskRunnerWindows</code> and <code>SCTaskRunnerMacOS</code> in the SCBuilder-repository. They run natively on
+a Windows- respectively macOS-host (there are no macOS-containers, and the native toolchains - Visual Studio, Xcode - are
+required). Their server-logic is shared and lives in <code>ScriptCollection.TFCPS.SCTaskRunnerServer</code>.</p>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      
+      <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
